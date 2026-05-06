@@ -7,7 +7,6 @@ export default function MenuCadastro({ onVoltar }) {
   const [erro, setErro] = useState(null)
   const [sucesso, setSucesso] = useState(null)
 
-  // Form Atração
   const [atracaoForm, setAtracaoForm] = useState({
     nome: '',
     tipo: 'montanha-russa',
@@ -17,7 +16,6 @@ export default function MenuCadastro({ onVoltar }) {
     passes_com_prioridade: ''
   })
 
-  // Form Visitante
   const [visitanteForm, setVisitanteForm] = useState({
     nome: '',
     cpf: '',
@@ -29,18 +27,12 @@ export default function MenuCadastro({ onVoltar }) {
 
   const handleAtracaoChange = (e) => {
     const { name, value } = e.target
-    setAtracaoForm(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setAtracaoForm(prev => ({ ...prev, [name]: value }))
   }
 
   const handleVisitanteChange = (e) => {
     const { name, value } = e.target
-    setVisitanteForm(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setVisitanteForm(prev => ({ ...prev, [name]: value }))
   }
 
   const handleAtracaoSubmit = async (e) => {
@@ -50,8 +42,8 @@ export default function MenuCadastro({ onVoltar }) {
     setSucesso(null)
 
     try {
-      const horarios = atracaoForm.horarios_disponiveis.split(',').map(h => h.trim())
-      const passes = atracaoForm.passes_com_prioridade.split(',').map(p => p.trim()).filter(p => p)
+      const horarios = atracaoForm.horarios_disponiveis.split(',').map(h => h.trim()).filter(Boolean)
+      const passes = atracaoForm.passes_com_prioridade.split(',').map(p => p.trim()).filter(Boolean)
 
       await createAtracao({
         nome: atracaoForm.nome,
@@ -62,7 +54,7 @@ export default function MenuCadastro({ onVoltar }) {
         passes_com_prioridade: passes
       })
 
-      setSucesso('Atração criada com sucesso!')
+      setSucesso('Atracao criada com sucesso!')
       setAtracaoForm({
         nome: '',
         tipo: 'montanha-russa',
@@ -72,7 +64,7 @@ export default function MenuCadastro({ onVoltar }) {
         passes_com_prioridade: ''
       })
     } catch (err) {
-      setErro('Erro ao criar atração: ' + err.message)
+      setErro('Erro ao criar atracao: ' + err.message)
     } finally {
       setCarregando(false)
     }
@@ -112,40 +104,38 @@ export default function MenuCadastro({ onVoltar }) {
 
   return (
     <>
-      <div className="header">
-        <h1>📝 Cadastros</h1>
-        <button 
-          className="secondary"
-          onClick={onVoltar}
-          style={{ marginTop: '10px' }}
-        >
-          ← Voltar
+      <div className="header park-hero">
+        <p className="eyebrow">Cadastros</p>
+        <h1>Novos registros</h1>
+        <p>Cadastre atracoes com horarios e visitantes com e-mail, senha e tipo de ingresso.</p>
+        <button className="secondary" onClick={onVoltar} style={{ marginTop: '10px' }}>
+          Voltar
         </button>
       </div>
 
       {erro && <div className="error">{erro}</div>}
       {sucesso && <div className="success">{sucesso}</div>}
 
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-        <button 
-          className={abaSelecionada === 'atracao' ? 'primary' : 'secondary'}
+      <div className="tabs">
+        <button
+          className={abaSelecionada === 'atracao' ? 'tab active' : 'tab'}
           onClick={() => setAbaSelecionada('atracao')}
         >
-          🎢 Cadastrar Atração
+          Cadastrar Atracao
         </button>
-        <button 
-          className={abaSelecionada === 'visitante' ? 'primary' : 'secondary'}
+        <button
+          className={abaSelecionada === 'visitante' ? 'tab active' : 'tab'}
           onClick={() => setAbaSelecionada('visitante')}
         >
-          👤 Cadastrar Visitante
+          Cadastrar Visitante
         </button>
       </div>
 
       {abaSelecionada === 'atracao' ? (
-        <div className="card" style={{ maxWidth: '600px' }}>
-          <h3>🎢 Cadastrar Nova Atração</h3>
+        <div className="card" style={{ maxWidth: '680px' }}>
+          <h3>Cadastrar Nova Atracao</h3>
           <form onSubmit={handleAtracaoSubmit}>
-            <label><strong>Nome da Atração:</strong></label>
+            <label><strong>Nome da Atracao:</strong></label>
             <input
               type="text"
               name="nome"
@@ -163,58 +153,58 @@ export default function MenuCadastro({ onVoltar }) {
               <option value="brinquedo infantil">Brinquedo infantil</option>
             </select>
 
-            <label><strong>Capacidade por Sessão:</strong></label>
-            <input
-              type="number"
-              name="capacidade_por_sessao"
-              value={atracaoForm.capacidade_por_sessao}
-              onChange={handleAtracaoChange}
-              placeholder="Ex: 50"
-              required
-            />
+            <div className="form-row">
+              <div>
+                <label><strong>Capacidade por Sessao:</strong></label>
+                <input
+                  type="number"
+                  name="capacidade_por_sessao"
+                  value={atracaoForm.capacidade_por_sessao}
+                  onChange={handleAtracaoChange}
+                  placeholder="Ex: 50"
+                  required
+                />
+              </div>
+              <div>
+                <label><strong>Idade Minima:</strong></label>
+                <input
+                  type="number"
+                  name="idade_minima"
+                  value={atracaoForm.idade_minima}
+                  onChange={handleAtracaoChange}
+                  placeholder="Ex: 10"
+                  required
+                />
+              </div>
+            </div>
 
-            <label><strong>Idade Mínima:</strong></label>
-            <input
-              type="number"
-              name="idade_minima"
-              value={atracaoForm.idade_minima}
-              onChange={handleAtracaoChange}
-              placeholder="Ex: 10"
-              required
-            />
-
-            <label><strong>Horários Disponíveis (separados por vírgula):</strong></label>
+            <label><strong>Horarios Disponiveis:</strong></label>
             <input
               type="text"
               name="horarios_disponiveis"
               value={atracaoForm.horarios_disponiveis}
               onChange={handleAtracaoChange}
-              placeholder="Ex: 09:00,10:30,12:00"
+              placeholder="Ex: 09:00, 10:30, 12:00"
               required
             />
 
-            <label><strong>Passes com Prioridade (separados por vírgula):</strong></label>
+            <label><strong>Passes com Prioridade:</strong></label>
             <input
               type="text"
               name="passes_com_prioridade"
               value={atracaoForm.passes_com_prioridade}
               onChange={handleAtracaoChange}
-              placeholder="Ex: vip,anual"
+              placeholder="Ex: vip, anual"
             />
 
-            <button 
-              type="submit"
-              className="primary"
-              disabled={carregando}
-              style={{ width: '100%' }}
-            >
-              {carregando ? 'Criando...' : 'Criar Atração'}
+            <button type="submit" className="primary" disabled={carregando} style={{ width: '100%' }}>
+              {carregando ? 'Criando...' : 'Criar Atracao'}
             </button>
           </form>
         </div>
       ) : (
-        <div className="card" style={{ maxWidth: '600px' }}>
-          <h3>👤 Cadastrar Novo Visitante</h3>
+        <div className="card" style={{ maxWidth: '680px' }}>
+          <h3>Cadastrar Novo Visitante</h3>
           <form onSubmit={handleVisitanteSubmit}>
             <label><strong>Nome:</strong></label>
             <input
@@ -222,28 +212,33 @@ export default function MenuCadastro({ onVoltar }) {
               name="nome"
               value={visitanteForm.nome}
               onChange={handleVisitanteChange}
-              placeholder="Ex: João Silva"
+              placeholder="Ex: Joao Silva"
               required
             />
 
-            <label><strong>CPF:</strong></label>
-            <input
-              type="text"
-              name="cpf"
-              value={visitanteForm.cpf}
-              onChange={handleVisitanteChange}
-              placeholder="Ex: 123.456.789-00"
-              required
-            />
-
-            <label><strong>Data de Nascimento:</strong></label>
-            <input
-              type="date"
-              name="data_nascimento"
-              value={visitanteForm.data_nascimento}
-              onChange={handleVisitanteChange}
-              required
-            />
+            <div className="form-row">
+              <div>
+                <label><strong>CPF:</strong></label>
+                <input
+                  type="text"
+                  name="cpf"
+                  value={visitanteForm.cpf}
+                  onChange={handleVisitanteChange}
+                  placeholder="Ex: 123.456.789-00"
+                  required
+                />
+              </div>
+              <div>
+                <label><strong>Data de Nascimento:</strong></label>
+                <input
+                  type="date"
+                  name="data_nascimento"
+                  value={visitanteForm.data_nascimento}
+                  onChange={handleVisitanteChange}
+                  required
+                />
+              </div>
+            </div>
 
             <label><strong>E-mail:</strong></label>
             <input
@@ -273,12 +268,7 @@ export default function MenuCadastro({ onVoltar }) {
               <option value="anual">Passe Anual</option>
             </select>
 
-            <button 
-              type="submit"
-              className="primary"
-              disabled={carregando}
-              style={{ width: '100%' }}
-            >
+            <button type="submit" className="primary" disabled={carregando} style={{ width: '100%' }}>
               {carregando ? 'Criando...' : 'Criar Visitante'}
             </button>
           </form>

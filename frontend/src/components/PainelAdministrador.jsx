@@ -72,18 +72,23 @@ export default function PainelAdministrador({ onVoltar }) {
       case 'atracao':
         return (
           <div>
-            <h3>🎢 Atrações</h3>
+            <h3>Atracoes</h3>
             <div className="grid">
               {atracao.map(a => (
-                <div key={a.id} className="card">
+                <div key={a.id} className="card attraction-card">
+                  <div className="attraction-image" aria-hidden="true">
+                    <span>{a.tipo?.slice(0, 2).toUpperCase()}</span>
+                  </div>
                   <h4>{a.nome}</h4>
-                  <p><strong>Tipo:</strong> {a.tipo}</p>
+                  <div className="meta-row">
+                    <span>{a.tipo}</span>
+                    <span>{a.idade_minima}+ anos</span>
+                  </div>
                   <p><strong>Capacidade:</strong> {a.capacidade_por_sessao} pessoas</p>
-                  <p><strong>Idade Mínima:</strong> {a.idade_minima}+</p>
-                  <p><strong>Horários:</strong> {a.horarios_disponiveis.join(', ')}</p>
+                  <p><strong>Horarios:</strong> {a.horarios_disponiveis.join(', ')}</p>
                   <p><strong>Visitantes na fila:</strong> {totalNaFilaPorAtracao(a.id)}</p>
                   <p><strong>Reservas do dia:</strong> {totalReservasPorAtracao(a.id)}</p>
-                  <button 
+                  <button
                     className="secondary"
                     onClick={() => {
                       setAbaSelecionada('fila')
@@ -102,26 +107,26 @@ export default function PainelAdministrador({ onVoltar }) {
       case 'visitante':
         return (
           <div>
-            <h3>👥 Visitantes</h3>
+            <h3>Visitantes</h3>
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <table>
                 <thead>
-                  <tr style={{ background: '#f0f0f0' }}>
-                    <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ccc' }}>ID</th>
-                    <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ccc' }}>Nome</th>
-                    <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ccc' }}>CPF</th>
-                    <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ccc' }}>Idade</th>
-                    <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #ccc' }}>Tipo Ingresso</th>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Idade</th>
+                    <th>Tipo Ingresso</th>
                   </tr>
                 </thead>
                 <tbody>
                   {visitantes.map(v => (
-                    <tr key={v.id} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '10px' }}>{v.id}</td>
-                      <td style={{ padding: '10px' }}>{v.nome}</td>
-                      <td style={{ padding: '10px' }}>{v.cpf}</td>
-                      <td style={{ padding: '10px' }}>{v.idade}</td>
-                      <td style={{ padding: '10px' }}>
+                    <tr key={v.id}>
+                      <td>{v.id}</td>
+                      <td>{v.nome}</td>
+                      <td>{v.cpf}</td>
+                      <td>{v.idade}</td>
+                      <td>
                         <span className={`badge ${v.tipo_ingresso}`}>
                           {v.tipo_ingresso.toUpperCase()}
                         </span>
@@ -137,9 +142,9 @@ export default function PainelAdministrador({ onVoltar }) {
       case 'fila':
         return (
           <div>
-            <h3>⏳ Filas Virtuais</h3>
+            <h3>Filas Virtuais</h3>
             {fila ? (
-              <div className="card">
+              <div className="card queue-card">
                 <h4>{fila.atracao_nome}</h4>
                 <p><strong>Total na Fila:</strong> {fila.total_na_fila}</p>
                 <button
@@ -151,21 +156,24 @@ export default function PainelAdministrador({ onVoltar }) {
                   Atender proximo visitante
                 </button>
                 <div>
-                  <h5>Próximas Pessoas:</h5>
+                  <h5>Proximas Pessoas:</h5>
                   {fila.fila.slice(0, 10).map(item => (
-                    <div key={item.reserva_id} style={{ padding: '10px', background: '#f9f9f9', margin: '5px 0', borderRadius: '4px' }}>
-                      <p><strong>{item.posicao}.</strong> {item.visitante_nome}</p>
-                      <p>Horário: {item.horario} | 
-                        <span className={`badge ${item.tipo_ingresso}`}>
-                          {item.tipo_ingresso.toUpperCase()}
-                        </span>
-                      </p>
+                    <div key={item.reserva_id} className="list-item">
+                      <div className="list-item-info">
+                        <h4>{item.posicao}. {item.visitante_nome}</h4>
+                        <p>Horario: {item.horario}</p>
+                      </div>
+                      <span className={`badge ${item.tipo_ingresso}`}>
+                        {item.tipo_ingresso.toUpperCase()}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <p>Selecione uma atração acima para ver a fila</p>
+              <div className="card empty-state">
+                <p>Selecione uma atracao para ver a fila.</p>
+              </div>
             )}
           </div>
         )
@@ -173,21 +181,21 @@ export default function PainelAdministrador({ onVoltar }) {
       case 'estatistica':
         return (
           <div>
-            <h3>📊 Estatísticas</h3>
+            <h3>Estatisticas</h3>
             {estatistica && (
               <div className="grid">
                 <div className="card">
                   <h4>Total de Reservas</h4>
-                  <p style={{ fontSize: '2rem', color: '#667eea', fontWeight: 'bold' }}>
+                  <p style={{ fontSize: '2rem', color: '#1769aa', fontWeight: 'bold' }}>
                     {estatistica.total_reservas}
                   </p>
                 </div>
 
                 {estatistica.atracao_mais_disputada && (
                   <div className="card">
-                    <h4>Atração Mais Disputada</h4>
+                    <h4>Atracao Mais Disputada</h4>
                     <p>ID: {estatistica.atracao_mais_disputada.atracao_id}</p>
-                    <p style={{ fontSize: '1.5rem', color: '#667eea', fontWeight: 'bold' }}>
+                    <p style={{ fontSize: '1.5rem', color: '#1769aa', fontWeight: 'bold' }}>
                       {estatistica.atracao_mais_disputada.quantidade_reservas} reservas
                     </p>
                   </div>
@@ -197,7 +205,7 @@ export default function PainelAdministrador({ onVoltar }) {
                   <div className="card">
                     <h4>Visitante Mais Ativo</h4>
                     <p>ID: {estatistica.visitante_mais_ativo.visitante_id}</p>
-                    <p style={{ fontSize: '1.5rem', color: '#667eea', fontWeight: 'bold' }}>
+                    <p style={{ fontSize: '1.5rem', color: '#1769aa', fontWeight: 'bold' }}>
                       {estatistica.visitante_mais_ativo.quantidade_reservas} reservas
                     </p>
                   </div>
@@ -214,14 +222,12 @@ export default function PainelAdministrador({ onVoltar }) {
 
   return (
     <>
-      <div className="header">
-        <h1>🎯 Painel de Controle</h1>
-        <button 
-          className="secondary"
-          onClick={onVoltar}
-          style={{ marginTop: '10px' }}
-        >
-          ← Voltar
+      <div className="header park-hero">
+        <p className="eyebrow">Operacao do parque</p>
+        <h1>Painel de Controle</h1>
+        <p>Acompanhe atracoes, visitantes, filas virtuais e metricas do dia.</p>
+        <button className="secondary" onClick={onVoltar} style={{ marginTop: '10px' }}>
+          Voltar
         </button>
       </div>
 
@@ -231,37 +237,33 @@ export default function PainelAdministrador({ onVoltar }) {
         <div className="loading">Carregando dados...</div>
       ) : (
         <>
-          <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <button 
-              className={abaSelecionada === 'atracao' ? 'primary' : 'secondary'}
+          <div className="tabs">
+            <button
+              className={abaSelecionada === 'atracao' ? 'tab active' : 'tab'}
               onClick={() => setAbaSelecionada('atracao')}
             >
-              🎢 Atrações
+              Atracoes
             </button>
-            <button 
-              className={abaSelecionada === 'visitante' ? 'primary' : 'secondary'}
+            <button
+              className={abaSelecionada === 'visitante' ? 'tab active' : 'tab'}
               onClick={() => setAbaSelecionada('visitante')}
             >
-              👥 Visitantes
+              Visitantes
             </button>
-            <button 
-              className={abaSelecionada === 'fila' ? 'primary' : 'secondary'}
+            <button
+              className={abaSelecionada === 'fila' ? 'tab active' : 'tab'}
               onClick={() => setAbaSelecionada('fila')}
             >
-              ⏳ Filas
+              Filas
             </button>
-            <button 
-              className={abaSelecionada === 'estatistica' ? 'primary' : 'secondary'}
+            <button
+              className={abaSelecionada === 'estatistica' ? 'tab active' : 'tab'}
               onClick={() => setAbaSelecionada('estatistica')}
             >
-              📊 Estatísticas
+              Estatisticas
             </button>
-            <button 
-              className="secondary"
-              onClick={carregarDados}
-              style={{ marginLeft: 'auto' }}
-            >
-              🔄 Atualizar
+            <button className="secondary" onClick={carregarDados}>
+              Atualizar
             </button>
           </div>
 
