@@ -1,0 +1,47 @@
+# API - Sistema de Reservas Parque Temático (Produção)
+FROM ruby:2.7-slim
+
+# Definir workdir
+WORKDIR /app
+
+# Definir variáveis de build
+ARG RACK_ENV=production
+ENV RACK_ENV=${RACK_ENV}
+
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    libpq-dev \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar Gemfile
+COPY api/Gemfile Gemfile
+
+# Instalar gems
+RUN bundle install
+
+# Copiar código da API
+COPY api/ .
+
+# Copiar dados (seed)
+COPY seed.rb .
+
+# Copiar modelos
+COPY disney/ /app/disney/
+
+# Criar usuário não-root
+RUN useradd -m -u 1000 appuser
+USER appuser
+
+# Expor porta
+EXPOSE 4567
+
+# Healthcheck
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+  CMD curl -f http://localhost:4567/api/atracao || exit 1
+
+# Comando padrão
+CMD ["sh", "-c", "ruby seed.rb && ruby app.rb -o 0.0.0.0"]

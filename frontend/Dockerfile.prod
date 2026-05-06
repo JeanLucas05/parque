@@ -1,0 +1,44 @@
+# Frontend - Sistema de Reservas Parque Temático (Produção)
+FROM node:18-alpine as builder
+
+WORKDIR /app
+
+ARG VITE_API_URL=http://localhost:4567
+ENV VITE_API_URL=$VITE_API_URL
+
+# Copiar package files
+COPY package.json package-lock.json ./
+
+# Instalar dependências (apenas produção)
+RUN npm ci --only=production && npm ci
+
+# Copiar código
+COPY . .
+
+# Build otimizado
+RUN npm run build
+
+# Stage 2: Serve - multi-stage otimizado
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Instalar serve
+RUN npm install -g serve --no-save
+
+# Copiar build do stage anterior
+COPY --from=builder /app/dist ./dist
+
+# Criar usuário não-root
+RUN addgroup -g 1000 appuser && adduser -D -u 1000 -G appuser appuser
+USER appuser
+
+# Expor porta
+EXPOSE 3000
+
+# Healthcheck
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1
+
+# Comando para servir
+CMD ["serve", "-s", "dist", "-l", "3000"]

@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+yarn.lock
+*.lock
+
+# Build output
+dist
+build
+
+# IDE
+.vscode
+.idea
+.sublime-text-project
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs
+README.md
+docs/
+
+# Tests
+test/
+spec/
+__tests__
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Cache
+.cache
+tmp/
+
+# Vite
+.vite

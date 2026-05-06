@@ -1,0 +1,12 @@
+source 'https://rubygems.org'
+
+gem 'sinatra', '~> 4.0'
+gem 'sinatra-cross_origin'
+
+# servidor (ESSENCIAL pro Sinatra 4)
+gem 'puma'
+gem 'rackup'
+gem 'pg', '~> 1.5.0'
+
+# opcional (Ruby já tem, mas não quebra)
+gem 'json'

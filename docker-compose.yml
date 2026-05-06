@@ -1,0 +1,92 @@
+services:
+  # ============================================
+  # Database - PostgreSQL
+  # ============================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: parque-db
+    environment:
+      POSTGRES_USER: disney_user
+      POSTGRES_PASSWORD: disney_pass_2026
+      POSTGRES_DB: disney_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - parque-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U disney_user -d disney_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  # ============================================
+  # Backend - API Ruby/Sinatra
+  # ============================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: parque-api
+    ports:
+      - "4567:4567"
+    environment:
+      RACK_ENV: development
+      DATABASE_URL: postgresql://disney_user:disney_pass_2026@postgres:5432/disney_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./api:/app/api
+      - ./disney:/app/disney
+      - ./seed.rb:/app/seed.rb
+    working_dir: /app
+    networks:
+      - parque-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4567/api/atracao"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ============================================
+  # Frontend - React/Vite
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:4567
+    container_name: parque-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://localhost:4567
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - parque-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+# ============================================
+# Networks & Volumes
+# ============================================
+networks:
+  parque-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
