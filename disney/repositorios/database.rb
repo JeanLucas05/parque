@@ -37,7 +37,8 @@ module Database
           nome TEXT NOT NULL,
           cpf TEXT NOT NULL UNIQUE,
           data_nascimento DATE NOT NULL,
-          email TEXT NOT NULL,
+          email TEXT NOT NULL UNIQUE,
+          senha_hash TEXT NOT NULL DEFAULT '',
           tipo_ingresso TEXT NOT NULL,
           reservas JSONB NOT NULL DEFAULT '[]'::jsonb,
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -57,6 +58,9 @@ module Database
           updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
       SQL
+
+      conn.exec("ALTER TABLE visitantes ADD COLUMN IF NOT EXISTS senha_hash TEXT NOT NULL DEFAULT ''")
+      conn.exec("CREATE UNIQUE INDEX IF NOT EXISTS visitantes_email_unique ON visitantes (email)")
     end
   end
 end

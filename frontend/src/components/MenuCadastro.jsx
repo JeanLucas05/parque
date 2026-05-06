@@ -23,6 +23,7 @@ export default function MenuCadastro({ onVoltar }) {
     cpf: '',
     data_nascimento: '',
     email: '',
+    senha: '',
     tipo_ingresso: 'normal'
   })
 
@@ -89,6 +90,7 @@ export default function MenuCadastro({ onVoltar }) {
         cpf: visitanteForm.cpf,
         data_nascimento: visitanteForm.data_nascimento,
         email: visitanteForm.email,
+        senha: visitanteForm.senha,
         tipo_ingresso: visitanteForm.tipo_ingresso
       })
 
@@ -98,6 +100,7 @@ export default function MenuCadastro({ onVoltar }) {
         cpf: '',
         data_nascimento: '',
         email: '',
+        senha: '',
         tipo_ingresso: 'normal'
       })
     } catch (err) {
@@ -249,6 +252,17 @@ export default function MenuCadastro({ onVoltar }) {
               value={visitanteForm.email}
               onChange={handleVisitanteChange}
               placeholder="Ex: joao@email.com"
+              required
+            />
+
+            <label><strong>Senha:</strong></label>
+            <input
+              type="password"
+              name="senha"
+              value={visitanteForm.senha}
+              onChange={handleVisitanteChange}
+              placeholder="Minimo 4 caracteres"
+              minLength="4"
               required
             />
 

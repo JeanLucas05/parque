@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { getVisitanteById, getReservaByVisitante, getAtracao, createReserva } from '../services/api'
+import { loginVisitante, getReservaByVisitante, getAtracao, createReserva } from '../services/api'
 
 export default function PortalVisitante({ onVoltar }) {
-  const [visitanteId, setVisitanteId] = useState('')
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
   const [visitanteLogado, setVisitanteLogado] = useState(null)
   const [atracao, setAtracao] = useState([])
   const [reservas, setReservas] = useState([])
@@ -39,14 +40,14 @@ export default function PortalVisitante({ onVoltar }) {
     setSucesso(null)
 
     try {
-      const visitante = await getVisitanteById(parseInt(visitanteId))
+      const visitante = await loginVisitante(email, senha)
       setVisitanteLogado(visitante)
       
-      await carregarReservasVisitante(parseInt(visitanteId))
+      await carregarReservasVisitante(visitante.id)
       
       setSucesso(`Bem-vindo, ${visitante.nome}!`)
     } catch (err) {
-      setErro('Visitante não encontrado')
+      setErro(err.response?.data?.erro || 'E-mail ou senha invalidos')
     } finally {
       setCarregando(false)
     }
@@ -104,14 +105,23 @@ export default function PortalVisitante({ onVoltar }) {
 
           <form onSubmit={fazerLogin}>
             <label>
-              <strong>ID do Visitante:</strong>
+              <strong>E-mail:</strong>
             </label>
             <input
-              type="number"
-              value={visitanteId}
-              onChange={(e) => setVisitanteId(e.target.value)}
-              placeholder="Digite seu ID"
-              min="1"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Digite seu e-mail"
+              required
+            />
+            <label>
+              <strong>Senha:</strong>
+            </label>
+            <input
+              type="password"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              placeholder="Digite sua senha"
               required
             />
             <button 
@@ -125,7 +135,7 @@ export default function PortalVisitante({ onVoltar }) {
           </form>
 
           <p style={{ marginTop: '20px', color: '#666' }}>
-            💡 Dica: IDs de exemplo: 1, 2, 3, 4, 5
+            Dica: use joao@email.com com senha 1234 para testar.
           </p>
         </div>
       </>
@@ -144,7 +154,8 @@ export default function PortalVisitante({ onVoltar }) {
             className="secondary"
             onClick={() => {
               setVisitanteLogado(null)
-              setVisitanteId('')
+              setEmail('')
+              setSenha('')
               setReservas([])
             }}
             style={{ marginRight: '10px' }}

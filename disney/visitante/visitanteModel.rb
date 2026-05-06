@@ -1,15 +1,16 @@
 require 'date'
 
 class VisitanteModel
-  attr_accessor :id, :nome, :cpf, :data_nascimento, :email, :tipo_ingresso, :reservas
+  attr_accessor :id, :nome, :cpf, :data_nascimento, :email, :tipo_ingresso, :reservas, :senha_hash
 
-  def initialize(id, nome, cpf, data_nascimento, email, tipo_ingresso)
+  def initialize(id, nome, cpf, data_nascimento, email, tipo_ingresso, senha_hash = nil)
     @id = id
     @nome = nome
     @cpf = cpf
     @data_nascimento = data_nascimento
     @email = email
     @tipo_ingresso = tipo_ingresso
+    @senha_hash = senha_hash
     @reservas = []
   end
 

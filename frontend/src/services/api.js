@@ -65,6 +65,16 @@ export const getVisitanteById = async (id) => {
   }
 }
 
+export const loginVisitante = async (email, senha) => {
+  try {
+    const response = await api.post('/visitante/login', { email, senha })
+    return response.data
+  } catch (error) {
+    console.error('Erro ao fazer login do visitante:', error)
+    throw error
+  }
+}
+
 export const createVisitante = async (data) => {
   try {
     const response = await api.post('/visitante', data)

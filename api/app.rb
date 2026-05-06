@@ -4,6 +4,7 @@ require 'sinatra'
 require 'sinatra/cross_origin'
 require 'json'
 require 'date'
+require 'digest'
 
 register Sinatra::CrossOrigin
 enable :cross_origin
@@ -79,6 +80,22 @@ def reserva_para_json(reserva)
   }
 end
 
+def visitante_para_json(visitante)
+  {
+    id: visitante.id,
+    nome: visitante.nome,
+    cpf: visitante.cpf,
+    data_nascimento: visitante.data_nascimento.to_s,
+    idade: visitante.get_idade,
+    email: visitante.email,
+    tipo_ingresso: visitante.tipo_ingresso
+  }
+end
+
+def hash_senha(senha)
+  Digest::SHA256.hexdigest(senha.to_s)
+end
+
 # ======== ATRAÇÕES ========
 
 get '/api/atracao' do
@@ -147,17 +164,7 @@ end
 get '/api/visitante' do
   content_type :json
   visitantes = REPOSITORIO_VISITANTE.obter_todos
-  visitantes.map do |v|
-    {
-      id: v.id,
-      nome: v.nome,
-      cpf: v.cpf,
-      data_nascimento: v.data_nascimento.to_s,
-      idade: v.get_idade,
-      email: v.email,
-      tipo_ingresso: v.tipo_ingresso
-    }
-  end.to_json
+  visitantes.map { |v| visitante_para_json(v) }.to_json
 end
 
 get '/api/visitante/:id' do
@@ -166,15 +173,7 @@ get '/api/visitante/:id' do
   visitante = REPOSITORIO_VISITANTE.obter_por_id(id)
   
   if visitante
-    {
-      id: visitante.id,
-      nome: visitante.nome,
-      cpf: visitante.cpf,
-      data_nascimento: visitante.data_nascimento.to_s,
-      idade: visitante.get_idade,
-      email: visitante.email,
-      tipo_ingresso: visitante.tipo_ingresso
-    }.to_json
+    visitante_para_json(visitante).to_json
   else
     status 404
     { erro: 'Visitante não encontrado' }.to_json
@@ -186,6 +185,12 @@ post '/api/visitante' do
   data = JSON.parse(request.body.read)
   
   data_nascimento = Date.parse(data['data_nascimento'])
+  senha = data['senha'].to_s
+
+  if senha.length < 4
+    status 400
+    return { erro: 'Senha deve ter pelo menos 4 caracteres' }.to_json
+  end
   
   visitante = VisitanteModel.new(
     (REPOSITORIO_VISITANTE.obter_todos.map(&:id).max || 0) + 1,
@@ -193,7 +198,8 @@ post '/api/visitante' do
     data['cpf'],
     data_nascimento,
     data['email'],
-    data['tipo_ingresso'].to_sym
+    data['tipo_ingresso'].to_sym,
+    hash_senha(senha)
   )
   
   REPOSITORIO_VISITANTE.salvar(visitante)
@@ -212,6 +218,22 @@ get '/api/reserva' do
   content_type :json
   reservas = REPOSITORIO_RESERVA.obter_todas
   reservas.map { |r| reserva_para_json(r) }.to_json
+end
+
+post '/api/visitante/login' do
+  content_type :json
+  data = JSON.parse(request.body.read)
+  email = data['email'].to_s.strip
+  senha = data['senha'].to_s
+
+  visitante = REPOSITORIO_VISITANTE.obter_por_email(email)
+
+  unless visitante && visitante.senha_hash == hash_senha(senha)
+    status 401
+    return { erro: 'E-mail ou senha invalidos' }.to_json
+  end
+
+  visitante_para_json(visitante).to_json
 end
 
 get '/api/reserva/visitante/:visitante_id' do

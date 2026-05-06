@@ -13,6 +13,7 @@ O projeto usa:
 
 - Cadastra atracoes com nome, tipo, capacidade, horarios, idade minima e passes prioritarios.
 - Cadastra visitantes com nome, CPF, data de nascimento, e-mail e tipo de ingresso.
+- Permite login de visitante por e-mail e senha.
 - Permite que visitantes entrem em filas/reservem horarios para atracoes.
 - Calcula prioridade na fila para visitantes VIP e passe anual.
 - Mostra a posicao do visitante na fila.
@@ -124,15 +125,15 @@ Os dados nao sao mais salvos em JSON. A persistencia correta e PostgreSQL.
 
 ## Visitantes de Teste
 
-Use esses IDs para entrar no Portal do Visitante:
+Use estes e-mails no Portal do Visitante. A senha padrao dos usuarios do seed e `1234`.
 
-| ID | Nome | Tipo de ingresso |
-| --- | --- | --- |
-| 1 | Joao Silva | VIP |
-| 2 | Maria Santos | Normal |
-| 3 | Pedro Costa | Anual |
-| 4 | Ana Oliveira | Normal |
-| 5 | Lucas Martins | VIP |
+| E-mail | Senha | Nome | Tipo de ingresso |
+| --- | --- | --- | --- |
+| joao@email.com | 1234 | Joao Silva | VIP |
+| maria@email.com | 1234 | Maria Santos | Normal |
+| pedro@email.com | 1234 | Pedro Costa | Anual |
+| ana@email.com | 1234 | Ana Oliveira | Normal |
+| lucas@email.com | 1234 | Lucas Martins | VIP |
 
 ## Fluxo de Uso
 
@@ -140,7 +141,7 @@ Use esses IDs para entrar no Portal do Visitante:
 
 1. Acesse `http://localhost:3000`.
 2. Entre em `Portal do Visitante`.
-3. Informe um ID de visitante, por exemplo `1`.
+3. Informe e-mail e senha, por exemplo `joao@email.com` e `1234`.
 4. Veja as atracoes disponiveis.
 5. Escolha uma atracao e um horario.
 6. Confirme a reserva.
@@ -204,6 +205,7 @@ POST   /atracao
 GET    /visitante
 GET    /visitante/:id
 POST   /visitante
+POST   /visitante/login
 ```
 
 ### Reservas

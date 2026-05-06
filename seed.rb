@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require 'date'
+require 'digest'
 
 require_relative 'disney/atracao/atracaoModel'
 require_relative 'disney/visitante/visitanteModel'
@@ -45,23 +46,27 @@ puts 'OK Carrossel Magico'
 
 puts 'Inserindo/atualizando visitantes...'
 
-visitante1 = VisitanteModel.new(1, 'Joao Silva', '123.456.789-00', Date.new(1990, 5, 15), 'joao@email.com', :vip)
+def senha_hash(senha)
+  Digest::SHA256.hexdigest(senha)
+end
+
+visitante1 = VisitanteModel.new(1, 'Joao Silva', '123.456.789-00', Date.new(1990, 5, 15), 'joao@email.com', :vip, senha_hash('1234'))
 repositorio_visitante.salvar(visitante1)
 puts 'OK Joao Silva'
 
-visitante2 = VisitanteModel.new(2, 'Maria Santos', '987.654.321-11', Date.new(2010, 8, 22), 'maria@email.com', :normal)
+visitante2 = VisitanteModel.new(2, 'Maria Santos', '987.654.321-11', Date.new(2010, 8, 22), 'maria@email.com', :normal, senha_hash('1234'))
 repositorio_visitante.salvar(visitante2)
 puts 'OK Maria Santos'
 
-visitante3 = VisitanteModel.new(3, 'Pedro Costa', '555.666.777-88', Date.new(1985, 3, 10), 'pedro@email.com', :anual)
+visitante3 = VisitanteModel.new(3, 'Pedro Costa', '555.666.777-88', Date.new(1985, 3, 10), 'pedro@email.com', :anual, senha_hash('1234'))
 repositorio_visitante.salvar(visitante3)
 puts 'OK Pedro Costa'
 
-visitante4 = VisitanteModel.new(4, 'Ana Oliveira', '444.333.222-11', Date.new(2015, 12, 5), 'ana@email.com', :normal)
+visitante4 = VisitanteModel.new(4, 'Ana Oliveira', '444.333.222-11', Date.new(2015, 12, 5), 'ana@email.com', :normal, senha_hash('1234'))
 repositorio_visitante.salvar(visitante4)
 puts 'OK Ana Oliveira'
 
-visitante5 = VisitanteModel.new(5, 'Lucas Martins', '111.222.333-44', Date.new(1995, 7, 18), 'lucas@email.com', :vip)
+visitante5 = VisitanteModel.new(5, 'Lucas Martins', '111.222.333-44', Date.new(1995, 7, 18), 'lucas@email.com', :vip, senha_hash('1234'))
 repositorio_visitante.salvar(visitante5)
 puts 'OK Lucas Martins'
 
