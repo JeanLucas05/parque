@@ -13,6 +13,8 @@ enable :cross_origin
 require_relative 'disney/atracao/atracaoModel'
 require_relative 'disney/visitante/visitanteModel'
 require_relative 'disney/reserva/reservaModel'
+require_relative 'disney/estruturas/no'
+require_relative 'disney/estruturas/lista_encadeada'
 require_relative 'disney/fila/filaVirtual'
 
 require_relative 'disney/repositorios/repositorioAtracao'
@@ -56,10 +58,23 @@ def fila_ativa(atracao_id)
   REPOSITORIO_RESERVA.obter_fila_ativa_por_atracao(atracao_id)
 end
 
+def construir_fila_virtual(atracao_id)
+  reservas = fila_ativa(atracao_id)
+  fila = FilaVirtual.new(atracao_id)
+  indice = 0
+
+  while indice < reservas.length
+    fila.adicionar_reserva(reservas[indice])
+    indice += 1
+  end
+
+  fila
+end
+
 def posicao_na_fila(reserva)
   return nil unless reserva.status == 'aguardando'
 
-  fila_ativa(reserva.atracao_id).find_index { |r| r.id == reserva.id }&.+(1)
+  construir_fila_virtual(reserva.atracao_id).obter_posicao(reserva.id)
 end
 
 def reserva_para_json(reserva)
@@ -304,19 +319,26 @@ get '/api/fila/:atracao_id' do
     return { erro: 'AtraÃ§Ã£o nÃ£o encontrada' }.to_json
   end
 
-  reservas = fila_ativa(atracao_id)
+  fila_virtual = construir_fila_virtual(atracao_id)
+  fila = []
+  atual = fila_virtual.fila.inicio
+  posicao = 1
 
-  fila = reservas.each_with_index.map do |r, index|
-    visitante = REPOSITORIO_VISITANTE.obter_por_id(r.visitante_id)
-    {
-      posicao: index + 1,
-      reserva_id: r.id,
-      visitante_id: r.visitante_id,
-      visitante_nome: visitante&.nome || "Visitante #{r.visitante_id}",
+  while atual
+    reserva = atual.dados
+    visitante = REPOSITORIO_VISITANTE.obter_por_id(reserva.visitante_id)
+    fila[fila.length] = {
+      posicao: posicao,
+      reserva_id: reserva.id,
+      visitante_id: reserva.visitante_id,
+      visitante_nome: visitante&.nome || "Visitante #{reserva.visitante_id}",
       tipo_ingresso: visitante&.tipo_ingresso&.to_s || 'normal',
-      horario: r.horario,
-      prioridade: r.prioridade
+      horario: reserva.horario,
+      prioridade: reserva.prioridade
     }
+
+    atual = atual.proximo
+    posicao += 1
   end
 
   {
@@ -341,16 +363,31 @@ post '/api/fila/:atracao_id/avancar' do
   quantidade = data.empty? ? 1 : (JSON.parse(data)['quantidade'] || 1).to_i
   quantidade = 1 if quantidade < 1
 
-  fila = fila_ativa(atracao_id)
-  atendidas = fila.first(quantidade).map do |reserva|
-    REPOSITORIO_RESERVA.atualizar_status(reserva.id, 'concluida')
-  end.compact
+  fila = construir_fila_virtual(atracao_id)
+  atendidas = []
+  contador = 0
+
+  while contador < quantidade
+    reserva = fila.remover_primeira_reserva
+    break unless reserva
+
+    reserva_atualizada = REPOSITORIO_RESERVA.atualizar_status(reserva.id, 'concluida')
+    atendidas[atendidas.length] = reserva_atualizada if reserva_atualizada
+    contador += 1
+  end
+
+  reservas_atendidas = []
+  indice = 0
+  while indice < atendidas.length
+    reservas_atendidas[reservas_atendidas.length] = reserva_para_json(atendidas[indice])
+    indice += 1
+  end
 
   {
     atracao_id: atracao.id,
     atracao_nome: atracao.nome,
     quantidade_atendida: atendidas.length,
-    reservas_atendidas: atendidas.map { |r| reserva_para_json(r) },
+    reservas_atendidas: reservas_atendidas,
     total_restante_na_fila: fila_ativa(atracao_id).length
   }.to_json
 rescue JSON::ParserError
